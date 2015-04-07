@@ -86,7 +86,7 @@ public class ZKProducerConsumer implements Watcher {
         boolean produce(String key) throws KeeperException, InterruptedException{
             byte[] value;
             value = key.getBytes();
-            zk.create(root + "/key", value, 
+            zk.create(root + "/key", value,
                       Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL);
 
             return true;
@@ -119,4 +119,4 @@ public class ZKProducerConsumer implements Watcher {
         }
     }
 }
-        
+

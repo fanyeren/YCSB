@@ -1,18 +1,18 @@
 /**
- * Copyright (c) 2010 Yahoo! Inc. All rights reserved.                                                                                                                             
- *                                                                                                                                                                                 
- * Licensed under the Apache License, Version 2.0 (the "License"); you                                                                                                             
- * may not use this file except in compliance with the License. You                                                                                                                
- * may obtain a copy of the License at                                                                                                                                             
- *                                                                                                                                                                                 
- * http://www.apache.org/licenses/LICENSE-2.0                                                                                                                                      
- *                                                                                                                                                                                 
- * Unless required by applicable law or agreed to in writing, software                                                                                                             
- * distributed under the License is distributed on an "AS IS" BASIS,                                                                                                               
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or                                                                                                                 
- * implied. See the License for the specific language governing                                                                                                                    
- * permissions and limitations under the License. See accompanying                                                                                                                 
- * LICENSE file. 
+ * Copyright (c) 2010 Yahoo! Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You
+ * may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License. See accompanying
+ * LICENSE file.
  */
 
 package com.yahoo.ycsb.db;
@@ -30,40 +30,40 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * A class that wraps a JDBC compliant database to allow it to be interfaced with YCSB.
  * This class extends {@link DB} and implements the database interface used by YCSB client.
- * 
+ *
  * <br> Each client will have its own instance of this class. This client is
  * not thread safe.
- * 
+ *
  * <br> This interface expects a schema <key> <field1> <field2> <field3> ...
- * All attributes are of type VARCHAR. All accesses are through the primary key. Therefore, 
+ * All attributes are of type VARCHAR. All accesses are through the primary key. Therefore,
  * only one index on the primary key is needed.
- * 
+ *
  * <p> The following options must be passed when using this database client.
- * 
+ *
  * <ul>
  * <li><b>db.driver</b> The JDBC driver class to use.</li>
  * <li><b>db.url</b> The Database connection URL.</li>
  * <li><b>db.user</b> User name for the connection.</li>
  * <li><b>db.passwd</b> Password for the connection.</li>
  * </ul>
- *  
+ *
  * @author sudipto
  *
  */
 public class JdbcDBClient extends DB implements JdbcDBClientConstants {
-	
+
   private ArrayList<Connection> conns;
   private boolean initialized = false;
   private Properties props;
   private Integer jdbcFetchSize;
   private static final String DEFAULT_PROP = "";
   private ConcurrentMap<StatementType, PreparedStatement> cachedStatements;
-  
+
   /**
    * The statement type for the prepared statements.
    */
   private static class StatementType {
-    
+
     enum Type {
       INSERT(1),
       DELETE(2),
@@ -75,7 +75,7 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
       private Type(int type) {
         internalType = type;
       }
-      
+
       int getHashCode() {
         final int prime = 31;
         int result = 1;
@@ -83,12 +83,12 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
         return result;
       }
     }
-    
+
     Type type;
     int shardIndex;
     int numFields;
     String tableName;
-    
+
     StatementType(Type type, String tableName, int numFields, int _shardIndex) {
       this.type = type;
       this.tableName = tableName;
@@ -159,23 +159,23 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
            conn.close();
        }
     }
-  
+
   /**
    * Initialize the database connection and set it up for sending requests to the database.
    * This must be called once per client.
-   * @throws  
+   * @throws
    */
   @Override
-	public void init() throws DBException {
-		if (initialized) {
-		  System.err.println("Client connection already initialized.");
-		  return;
-		}
-		props = getProperties();
-		String urls = props.getProperty(CONNECTION_URL, DEFAULT_PROP);
-		String user = props.getProperty(CONNECTION_USER, DEFAULT_PROP);
-		String passwd = props.getProperty(CONNECTION_PASSWD, DEFAULT_PROP);
-		String driver = props.getProperty(DRIVER_CLASS);
+    public void init() throws DBException {
+        if (initialized) {
+          System.err.println("Client connection already initialized.");
+          return;
+        }
+        props = getProperties();
+        String urls = props.getProperty(CONNECTION_URL, DEFAULT_PROP);
+        String user = props.getProperty(CONNECTION_USER, DEFAULT_PROP);
+        String passwd = props.getProperty(CONNECTION_PASSWD, DEFAULT_PROP);
+        String driver = props.getProperty(DRIVER_CLASS);
 
       String jdbcFetchSizeStr = props.getProperty(JDBC_FETCH_SIZE);
           if (jdbcFetchSizeStr != null) {
@@ -191,9 +191,9 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
       Boolean autoCommit = Boolean.parseBoolean(autoCommitStr);
 
       try {
-		  if (driver != null) {
-	      Class.forName(driver);
-	    }
+          if (driver != null) {
+          Class.forName(driver);
+        }
           int shardCount = 0;
           conns = new ArrayList<Connection>(3);
           for (String url: urls.split(",")) {
@@ -212,35 +212,35 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
 
           System.out.println("Using " + shardCount + " shards");
 
-		  cachedStatements = new ConcurrentHashMap<StatementType, PreparedStatement>();
-		} catch (ClassNotFoundException e) {
-		  System.err.println("Error in initializing the JDBS driver: " + e);
-		  throw new DBException(e);
-		} catch (SQLException e) {
-		  System.err.println("Error in database operation: " + e);
+          cachedStatements = new ConcurrentHashMap<StatementType, PreparedStatement>();
+        } catch (ClassNotFoundException e) {
+          System.err.println("Error in initializing the JDBS driver: " + e);
+          throw new DBException(e);
+        } catch (SQLException e) {
+          System.err.println("Error in database operation: " + e);
       throw new DBException(e);
     } catch (NumberFormatException e) {
       System.err.println("Invalid value for fieldcount property. " + e);
       throw new DBException(e);
     }
-		initialized = true;
-	}
-	
+        initialized = true;
+    }
+
   @Override
-	public void cleanup() throws DBException {
-	  try {
+    public void cleanup() throws DBException {
+      try {
       cleanupAllConnections();
     } catch (SQLException e) {
       System.err.println("Error in closing the connection. " + e);
       throw new DBException(e);
     }
-	}
-	
-	private PreparedStatement createAndCacheInsertStatement(StatementType insertType, String key)
-	throws SQLException {
-	  StringBuilder insert = new StringBuilder("INSERT INTO ");
-	  insert.append(insertType.tableName);
-	  insert.append(" VALUES(?");
+    }
+
+    private PreparedStatement createAndCacheInsertStatement(StatementType insertType, String key)
+    throws SQLException {
+      StringBuilder insert = new StringBuilder("INSERT INTO ");
+      insert.append(insertType.tableName);
+      insert.append(" VALUES(?");
     for (int i = 0; i < insertType.numFields; i++) {
       insert.append(",?");
     }
@@ -249,10 +249,10 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
     PreparedStatement stmt = cachedStatements.putIfAbsent(insertType, insertStatement);
     if (stmt == null) return insertStatement;
     else return stmt;
-	}
-	
-	private PreparedStatement createAndCacheReadStatement(StatementType readType, String key)
-	throws SQLException {
+    }
+
+    private PreparedStatement createAndCacheReadStatement(StatementType readType, String key)
+    throws SQLException {
     StringBuilder read = new StringBuilder("SELECT * FROM ");
     read.append(readType.tableName);
     read.append(" WHERE ");
@@ -264,9 +264,9 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
     if (stmt == null) return readStatement;
     else return stmt;
   }
-	
-	private PreparedStatement createAndCacheDeleteStatement(StatementType deleteType, String key)
-	throws SQLException {
+
+    private PreparedStatement createAndCacheDeleteStatement(StatementType deleteType, String key)
+    throws SQLException {
     StringBuilder delete = new StringBuilder("DELETE FROM ");
     delete.append(deleteType.tableName);
     delete.append(" WHERE ");
@@ -277,9 +277,9 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
     if (stmt == null) return deleteStatement;
     else return stmt;
   }
-	
-	private PreparedStatement createAndCacheUpdateStatement(StatementType updateType, String key)
-	throws SQLException {
+
+    private PreparedStatement createAndCacheUpdateStatement(StatementType updateType, String key)
+    throws SQLException {
     StringBuilder update = new StringBuilder("UPDATE ");
     update.append(updateType.tableName);
     update.append(" SET ");
@@ -297,10 +297,10 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
     if (stmt == null) return insertStatement;
     else return stmt;
   }
-	
-	private PreparedStatement createAndCacheScanStatement(StatementType scanType, String key)
-	throws SQLException {
-	  StringBuilder select = new StringBuilder("SELECT * FROM ");
+
+    private PreparedStatement createAndCacheScanStatement(StatementType scanType, String key)
+    throws SQLException {
+      StringBuilder select = new StringBuilder("SELECT * FROM ");
     select.append(scanType.tableName);
     select.append(" WHERE ");
     select.append(PRIMARY_KEY);
@@ -313,10 +313,10 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
     else return stmt;
   }
 
-	@Override
-	public int read(String tableName, String key, Set<String> fields,
-			HashMap<String, ByteIterator> result) {
-	  if (tableName == null) {
+    @Override
+    public int read(String tableName, String key, Set<String> fields,
+            HashMap<String, ByteIterator> result) {
+      if (tableName == null) {
       return -1;
     }
     if (key == null) {
@@ -346,12 +346,12 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
         System.err.println("Error in processing read of table " + tableName + ": "+e);
       return -2;
     }
-	}
+    }
 
-	@Override
-	public int scan(String tableName, String startKey, int recordcount,
-			Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
-	  if (tableName == null) {
+    @Override
+    public int scan(String tableName, String startKey, int recordcount,
+            Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
+      if (tableName == null) {
       return -1;
     }
     if (startKey == null) {
@@ -381,11 +381,11 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
       System.err.println("Error in processing scan of table: " + tableName + e);
       return -2;
     }
-	}
+    }
 
-	@Override
-	public int update(String tableName, String key, HashMap<String, ByteIterator> values) {
-	  if (tableName == null) {
+    @Override
+    public int update(String tableName, String key, HashMap<String, ByteIterator> values) {
+      if (tableName == null) {
       return -1;
     }
     if (key == null) {
@@ -410,23 +410,23 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
       System.err.println("Error in processing update to table: " + tableName + e);
       return -1;
     }
-	}
+    }
 
-	@Override
-	public int insert(String tableName, String key, HashMap<String, ByteIterator> values) {
-	  if (tableName == null) {
-	    return -1;
-	  }
-	  if (key == null) {
-	    return -1;
-	  }
-	  try {
-	    int numFields = values.size();
-	    StatementType type = new StatementType(StatementType.Type.INSERT, tableName, numFields, getShardIndexByKey(key));
-	    PreparedStatement insertStatement = cachedStatements.get(type);
-	    if (insertStatement == null) {
-	      insertStatement = createAndCacheInsertStatement(type, key);
-	    }
+    @Override
+    public int insert(String tableName, String key, HashMap<String, ByteIterator> values) {
+      if (tableName == null) {
+        return -1;
+      }
+      if (key == null) {
+        return -1;
+      }
+      try {
+        int numFields = values.size();
+        StatementType type = new StatementType(StatementType.Type.INSERT, tableName, numFields, getShardIndexByKey(key));
+        PreparedStatement insertStatement = cachedStatements.get(type);
+        if (insertStatement == null) {
+          insertStatement = createAndCacheInsertStatement(type, key);
+        }
       insertStatement.setString(1, key);
       int index = 2;
       for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
@@ -440,11 +440,11 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
       System.err.println("Error in processing insert to table: " + tableName + e);
       return -1;
     }
-	}
+    }
 
-	@Override
-	public int delete(String tableName, String key) {
-	  if (tableName == null) {
+    @Override
+    public int delete(String tableName, String key) {
+      if (tableName == null) {
       return -1;
     }
     if (key == null) {
@@ -464,5 +464,5 @@ public class JdbcDBClient extends DB implements JdbcDBClientConstants {
       System.err.println("Error in processing delete to table: " + tableName + e);
       return -1;
     }
-	}
+    }
 }

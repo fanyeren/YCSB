@@ -33,17 +33,17 @@ import com.yahoo.ycsb.StringByteIterator;
  * gemfire.serverhost=host</code> properties on YCSB command line.
  * A locator may also be used for discovering a cacheServer
  * by using the property <code>gemfire.locator=host[port]</code></p>
- * 
+ *
  * <p>To run this client in a peer-to-peer topology with other GemFire
  * nodes, use the property <code>gemfire.topology=p2p</code>. Running
  * in p2p mode will enable embedded caching in this client.</p>
- * 
+ *
  * <p>YCSB by default does its operations against "usertable". When running
  * as a client this is a <code>ClientRegionShortcut.PROXY</code> region,
  * when running in p2p mode it is a <code>RegionShortcut.PARTITION</code>
  * region. A cache.xml defining "usertable" region can be placed in the
  * working directory to override these region definitions.</p>
- * 
+ *
  * @author Swapnil Bawaskar (sbawaska at vmware)
  *
  */
@@ -82,7 +82,7 @@ public class GemFireClient extends DB {
    * GemFire cache server
    */
   private boolean isClient;
-  
+
   @Override
   public void init() throws DBException {
     Properties props = getProperties();
@@ -99,7 +99,7 @@ public class GemFireClient extends DB {
       }
       serverHost = props.getProperty(SERVERHOST_PROPERTY_NAME, SERVERHOST_PROPERTY_DEFAULT);
       locatorStr = props.getProperty(LOCATOR_PROPERTY_NAME);
-      
+
       String topology = props.getProperty(TOPOLOGY_PROPERTY_NAME);
       if (topology != null && topology.equals(TOPOLOGY_P2P_VALUE)) {
         CacheFactory cf = new CacheFactory();
@@ -124,7 +124,7 @@ public class GemFireClient extends DB {
     }
     cache = ccf.create();
   }
-  
+
   @Override
   public int read(String table, String key, Set<String> fields,
       HashMap<String, ByteIterator> result) {
@@ -177,7 +177,7 @@ public class GemFireClient extends DB {
     }
     return retVal;
   }
-  
+
   private Region<String, Map<String, byte[]>> getRegion(String table) {
     Region<String, Map<String, byte[]>> r = cache.getRegion(table);
     if (r == null) {

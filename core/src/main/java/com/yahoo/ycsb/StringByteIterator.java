@@ -1,18 +1,18 @@
-/**                                                                                                                                                                                
- * Copyright (c) 2010 Yahoo! Inc. All rights reserved.                                                                                                                             
- *                                                                                                                                                                                 
- * Licensed under the Apache License, Version 2.0 (the "License"); you                                                                                                             
- * may not use this file except in compliance with the License. You                                                                                                                
- * may obtain a copy of the License at                                                                                                                                             
- *                                                                                                                                                                                 
- * http://www.apache.org/licenses/LICENSE-2.0                                                                                                                                      
- *                                                                                                                                                                                 
- * Unless required by applicable law or agreed to in writing, software                                                                                                             
- * distributed under the License is distributed on an "AS IS" BASIS,                                                                                                               
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or                                                                                                                 
- * implied. See the License for the specific language governing                                                                                                                    
- * permissions and limitations under the License. See accompanying                                                                                                                 
- * LICENSE file.                                                                                                                                                                   
+/**
+ * Copyright (c) 2010 Yahoo! Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You
+ * may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License. See accompanying
+ * LICENSE file.
  */
 
 package com.yahoo.ycsb;
@@ -30,7 +30,7 @@ public class StringByteIterator extends ByteIterator {
 	 */
 	public static void putAllAsByteIterators(Map<String, ByteIterator> out, Map<String, String> in) {
 	       for(String s: in.keySet()) { out.put(s, new StringByteIterator(in.get(s))); }
-	} 
+	}
 
 	/**
 	 * Put all of the entries of one map into the other, converting
@@ -38,7 +38,7 @@ public class StringByteIterator extends ByteIterator {
 	 */
 	public static void putAllAsStrings(Map<String, String> out, Map<String, ByteIterator> in) {
 	       for(String s: in.keySet()) { out.put(s, in.get(s).toString()); }
-	} 
+	}
 
 	/**
 	 * Create a copy of a map, converting the values from Strings to

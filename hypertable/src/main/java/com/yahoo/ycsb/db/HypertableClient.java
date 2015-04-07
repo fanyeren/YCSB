@@ -44,7 +44,7 @@ import com.yahoo.ycsb.DBException;
 public class HypertableClient extends com.yahoo.ycsb.DB
 {
     private boolean _debug = false;
-    
+
     private ThriftClient connection;
     private long ns;
 
@@ -52,40 +52,40 @@ public class HypertableClient extends com.yahoo.ycsb.DB
 
     public static final int OK = 0;
     public static final int SERVERERROR = -1;
-    
+
     public static final String NAMESPACE = "/ycsb";
     public static final int THRIFTBROKER_PORT = 38080;
 
     //TODO: make dynamic
     public static final int BUFFER_SIZE = 4096;
-    
+
     /**
      * Initialize any state for this DB.
      * Called once per DB instance; there is one DB instance per client thread.
      */
     @Override
     public void init() throws DBException
-    {        
+    {
         if ( (getProperties().getProperty("debug") != null) &&
                 (getProperties().getProperty("debug").equals("true")) )
         {
             _debug = true;
         }
-        
+
         try {
             connection = ThriftClient.create("localhost", THRIFTBROKER_PORT);
-            
+
             if (!connection.namespace_exists(NAMESPACE)) {
                 connection.namespace_create(NAMESPACE);
-            }    
+            }
             ns = connection.open_namespace(NAMESPACE);
         } catch (ClientException e) {
             throw new DBException("Could not open namespace", e);
         } catch (TException e) {
             throw new DBException("Could not open namespace", e);
         }
-            
-        
+
+
         _columnFamily = getProperties().getProperty("columnfamily");
         if (_columnFamily == null)
         {
@@ -110,9 +110,9 @@ public class HypertableClient extends com.yahoo.ycsb.DB
             throw new DBException("Could not close namespace", e);
         }
     }
-    
+
     /**
-     * Read a record from the database. Each field/value pair from the result 
+     * Read a record from the database. Each field/value pair from the result
      * will be stored in a HashMap.
      *
      * @param table The name of the table
@@ -122,21 +122,21 @@ public class HypertableClient extends com.yahoo.ycsb.DB
      * @return Zero on success, a non-zero error code on error
      */
     @Override
-    public int read(String table, String key, Set<String> fields, 
+    public int read(String table, String key, Set<String> fields,
                     HashMap<String, ByteIterator> result)
     {
-        //SELECT _column_family:field[i] 
+        //SELECT _column_family:field[i]
         //  FROM table WHERE ROW=key MAX_VERSIONS 1;
 
         if (_debug) {
-            System.out.println("Doing read from Hypertable columnfamily " + 
+            System.out.println("Doing read from Hypertable columnfamily " +
                     _columnFamily);
             System.out.println("Doing read for key: " + key);
         }
-        
+
         try {
             if (null != fields) {
-                Vector<HashMap<String, ByteIterator>> resMap = 
+                Vector<HashMap<String, ByteIterator>> resMap =
                         new Vector<HashMap<String, ByteIterator>>();
                 if (0 != scan(table, key, 1, fields, resMap)) {
                     return SERVERERROR;
@@ -147,7 +147,7 @@ public class HypertableClient extends com.yahoo.ycsb.DB
                 SerializedCellsReader reader = new SerializedCellsReader(null);
                 reader.reset(connection.get_row_serialized(ns, table, key));
                 while (reader.next()) {
-                    result.put(new String(reader.get_column_qualifier()), 
+                    result.put(new String(reader.get_column_qualifier()),
                             new ByteArrayByteIterator(reader.get_value()));
                 }
             }
@@ -164,27 +164,27 @@ public class HypertableClient extends com.yahoo.ycsb.DB
 
         return OK;
     }
-    
+
     /**
-     * Perform a range scan for a set of records in the database. Each 
+     * Perform a range scan for a set of records in the database. Each
      * field/value pair from the result will be stored in a HashMap.
      *
      * @param table The name of the table
      * @param startkey The record key of the first record to read.
      * @param recordcount The number of records to read
      * @param fields The list of fields to read, or null for all of them
-     * @param result A Vector of HashMaps, where each HashMap is a set 
+     * @param result A Vector of HashMaps, where each HashMap is a set
      *    field/value pairs for one record
      * @return Zero on success, a non-zero error code on error
      */
     @Override
-    public int scan(String table, String startkey, int recordcount, 
-                    Set<String> fields, 
+    public int scan(String table, String startkey, int recordcount,
+                    Set<String> fields,
                     Vector<HashMap<String, ByteIterator>> result)
     {
-        //SELECT _columnFamily:fields FROM table WHERE (ROW >= startkey) 
+        //SELECT _columnFamily:fields FROM table WHERE (ROW >= startkey)
         //    LIMIT recordcount MAX_VERSIONS 1;
-        
+
         ScanSpec spec = new ScanSpec();
         RowInterval elem = new RowInterval();
         elem.setStart_inclusive(true);
@@ -202,7 +202,7 @@ public class HypertableClient extends com.yahoo.ycsb.DB
 
         try {
             long sc = connection.scanner_open(ns, table, spec);
-                        
+
             String lastRow = null;
             boolean eos = false;
             while (!eos) {
@@ -214,14 +214,14 @@ public class HypertableClient extends com.yahoo.ycsb.DB
                         lastRow = currentRow;
                     }
                     result.lastElement().put(
-                            new String(reader.get_column_qualifier()), 
+                            new String(reader.get_column_qualifier()),
                             new ByteArrayByteIterator(reader.get_value()));
                 }
                 eos = reader.eos();
-                
+
 
                 if (_debug) {
-                    System.out.println("Number of rows retrieved so far: " + 
+                    System.out.println("Number of rows retrieved so far: " +
                                         result.size());
                 }
             }
@@ -234,14 +234,14 @@ public class HypertableClient extends com.yahoo.ycsb.DB
         } catch (TException e) {
             if (_debug)
                 System.err.println("Error doing scan");
-            return SERVERERROR;            
+            return SERVERERROR;
         }
-        
+
         return OK;
     }
 
     /**
-     * Update a record in the database. Any field/value pairs in the specified 
+     * Update a record in the database. Any field/value pairs in the specified
      * values HashMap will be written into the record with the specified
      * record key, overwriting any existing values with the same field name.
      *
@@ -251,14 +251,14 @@ public class HypertableClient extends com.yahoo.ycsb.DB
      * @return Zero on success, a non-zero error code on error
      */
     @Override
-    public int update(String table, String key, 
+    public int update(String table, String key,
             HashMap<String, ByteIterator> values)
     {
         return insert(table, key, values);
     }
 
     /**
-     * Insert a record in the database. Any field/value pairs in the specified 
+     * Insert a record in the database. Any field/value pairs in the specified
      * values HashMap will be written into the record with the specified
      * record key.
      *
@@ -268,26 +268,26 @@ public class HypertableClient extends com.yahoo.ycsb.DB
      * @return Zero on success, a non-zero error code on error
      */
     @Override
-    public int insert(String table, String key, 
+    public int insert(String table, String key,
             HashMap<String, ByteIterator> values)
     {
-        //INSERT INTO table VALUES 
+        //INSERT INTO table VALUES
         //  (key, _column_family:entry,getKey(), entry.getValue()), (...);
 
         if (_debug) {
             System.out.println("Setting up put for key: " + key);
         }
-        
+
         try {
             long mutator = connection.mutator_open(ns, table, 0, 0);
-            SerializedCellsWriter writer = 
+            SerializedCellsWriter writer =
                     new SerializedCellsWriter(BUFFER_SIZE*values.size(), true);
             for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
-                writer.add(key, _columnFamily, entry.getKey(), 
-                        SerializedCellsFlag.AUTO_ASSIGN, 
-                        ByteBuffer.wrap(entry.getValue().toArray()));            
+                writer.add(key, _columnFamily, entry.getKey(),
+                        SerializedCellsFlag.AUTO_ASSIGN,
+                        ByteBuffer.wrap(entry.getValue().toArray()));
             }
-            connection.mutator_set_cells_serialized(mutator, 
+            connection.mutator_set_cells_serialized(mutator,
                     writer.buffer(), true);
             connection.mutator_close(mutator);
         } catch (ClientException e) {
@@ -300,7 +300,7 @@ public class HypertableClient extends com.yahoo.ycsb.DB
                 System.err.println("Error doing set");
             return SERVERERROR;
         }
-        
+
         return OK;
     }
 
@@ -315,29 +315,29 @@ public class HypertableClient extends com.yahoo.ycsb.DB
     public int delete(String table, String key)
     {
         //DELETE * FROM table WHERE ROW=key;
-        
+
         if (_debug) {
             System.out.println("Doing delete for key: "+key);
         }
-        
+
         Cell entry = new Cell();
         entry.key = new Key();
         entry.key.row = key;
         entry.key.flag = KeyFlag.DELETE_ROW;
-        
+
         try {
             connection.set_cell(ns, table, entry);
         } catch (ClientException e) {
             if (_debug) {
                 System.err.println("Error doing delete: " + e.message);
             }
-            return SERVERERROR;            
+            return SERVERERROR;
         } catch (TException e) {
             if (_debug)
                 System.err.println("Error doing delete");
             return SERVERERROR;
         }
-      
+
         return OK;
     }
 }

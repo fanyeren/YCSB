@@ -11,6 +11,15 @@
   <name>Core YCSB</name>
   <packaging>jar</packaging>
 
+  <repositories>
+    <repository>
+      <id>apache-releases</id>
+      <name>Apache releases</name>
+      <url>https://repository.apache.org/content/repositories/releases/</url>
+    </repository>
+  </repositories>
+
+
   <properties>
      <jackson.api.version>1.9.4</jackson.api.version>
   </properties>

@@ -10,6 +10,16 @@
 
   <name>YCSB Root</name>
 
+
+  <repositories>
+    <repository>
+      <id>apache-releases</id>
+      <name>Apache releases</name>
+      <url>https://repository.apache.org/content/repositories/releases/</url>
+    </repository>
+  </repositories>
+
+
   <description>
     This is the top level project that builds, packages the core and all the DB bindings for YCSB infrastructure.
   </description>

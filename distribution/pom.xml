@@ -12,6 +12,16 @@
   <name>YCSB Release Distribution Builder</name>
   <packaging>pom</packaging>
 
+
+  <repositories>
+    <repository>
+      <id>apache-releases</id>
+      <name>Apache releases</name>
+      <url>https://repository.apache.org/content/repositories/releases/</url>
+    </repository>
+  </repositories>
+
+
   <description>
     This module creates the release package of the YCSB with all DB library bindings.
     It is only used by the build process and does not contain any real

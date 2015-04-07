@@ -1,18 +1,18 @@
-/**                                                                                                                                                                                
- * Copyright (c) 2010 Yahoo! Inc. All rights reserved.                                                                                                                             
- *                                                                                                                                                                                 
- * Licensed under the Apache License, Version 2.0 (the "License"); you                                                                                                             
- * may not use this file except in compliance with the License. You                                                                                                                
- * may obtain a copy of the License at                                                                                                                                             
- *                                                                                                                                                                                 
- * http://www.apache.org/licenses/LICENSE-2.0                                                                                                                                      
- *                                                                                                                                                                                 
- * Unless required by applicable law or agreed to in writing, software                                                                                                             
- * distributed under the License is distributed on an "AS IS" BASIS,                                                                                                               
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or                                                                                                                 
- * implied. See the License for the specific language governing                                                                                                                    
- * permissions and limitations under the License. See accompanying                                                                                                                 
- * LICENSE file.                                                                                                                                                                   
+/**
+ * Copyright (c) 2010 Yahoo! Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You
+ * may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License. See accompanying
+ * LICENSE file.
  */
 
 package com.yahoo.ycsb;
@@ -61,7 +61,7 @@ public class CommandLine
 	 System.out.println("  table [tablename] - Get or [set] the name of the table");
 	 System.out.println("  quit - Quit");
       }
-      
+
       public static void main(String[] args)
       {
 	 int argindex=0;
@@ -102,7 +102,7 @@ public class CommandLine
 	       }
 	       String propfile=args[argindex];
 	       argindex++;
-	       
+	
 	       Properties myfileprops=new Properties();
 	       try
 	       {
@@ -113,14 +113,14 @@ public class CommandLine
 		  System.out.println(e.getMessage());
 		  System.exit(0);
 	       }
-	       
+	
 	       for (Enumeration e=myfileprops.propertyNames(); e.hasMoreElements(); )
 	       {
 		  String prop=(String)e.nextElement();
-		  
+		
 		  fileprops.setProperty(prop,myfileprops.getProperty(prop));
 	       }
-	       
+	
 	    }
 	    else if (args[argindex].compareTo("-p")==0)
 	    {
@@ -136,7 +136,7 @@ public class CommandLine
 		  usageMessage();
 		  System.exit(0);
 	       }
-			   
+			
 	       String name=args[argindex].substring(0,eq);
 	       String value=args[argindex].substring(eq+1);
 	       props.put(name,value);
@@ -153,7 +153,7 @@ public class CommandLine
 	       }
 	       table=args[argindex];
 	       argindex++;
-	    }  
+	    }
 	    else
 	    {
 	       System.out.println("Unknown option "+args[argindex]);
@@ -176,10 +176,10 @@ public class CommandLine
 	 for (Enumeration e=props.propertyNames(); e.hasMoreElements(); )
 	 {
 	    String prop=(String)e.nextElement();
-	    
+	
 	    fileprops.setProperty(prop,props.getProperty(prop));
 	 }
-	 
+	
 	 props=fileprops;
 
 	 System.out.println("YCSB Command Line client");
@@ -193,17 +193,17 @@ public class CommandLine
 
 	 DB db=null;
 
-	 try 
+	 try
 	 {
 	    Class dbclass = classLoader.loadClass(dbname);
 	    db=(DB)dbclass.newInstance();
 	 }
-	 catch (Exception e) 
-	 {  
+	 catch (Exception e)
+	 {
 	    e.printStackTrace();
 	    System.exit(0);
 	 }
-	 
+	
 	 db.setProperties(props);
 	 try
 	 {
@@ -216,7 +216,7 @@ public class CommandLine
 	 }
 
 	 System.out.println("Connected.");
-	 
+	
 	 //main loop
 	 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -224,9 +224,9 @@ public class CommandLine
 	 {
 	    //get user input
 	    System.out.print("> ");
-	    
+	
 	    String input=null;
-	    
+	
 	    try
 	    {
 	       input=br.readLine();
@@ -237,12 +237,12 @@ public class CommandLine
 	       System.exit(1);
 	    }
 
-	    if (input.compareTo("")==0) 
+	    if (input.compareTo("")==0)
 	    {
 	       continue;
 	    }
 
-	    if (input.compareTo("help")==0) 
+	    if (input.compareTo("help")==0)
 	    {
 	       help();
 	       continue;
@@ -252,9 +252,9 @@ public class CommandLine
 	    {
 	       break;
 	    }
-	    
+	
 	    String[] tokens=input.split(" ");
-	    
+	
 	    long st=System.currentTimeMillis();
 	    //handle commands
 	    if (tokens[0].compareTo("table")==0)
@@ -279,20 +279,20 @@ public class CommandLine
 	       {
 		  System.out.println("Error: syntax is \"read keyname [field1 field2 ...]\"");
 	       }
-	       else 
+	       else
 	       {
 		  Set<String> fields=null;
 
 		  if (tokens.length>2)
 		  {
 		     fields=new HashSet<String>();
-		     
+		
 		     for (int i=2; i<tokens.length; i++)
 		     {
 			fields.add(tokens[i]);
 		     }
 		  }
-		  
+		
 		  HashMap<String,ByteIterator> result=new HashMap<String,ByteIterator>();
 		  int ret=db.read(table,tokens[1],fields,result);
 		  System.out.println("Return code: "+ret);
@@ -300,7 +300,7 @@ public class CommandLine
 		  {
 		     System.out.println(ent.getKey()+"="+ent.getValue());
 		  }
-	       }		  
+	       }		
 	    }
 	    else if (tokens[0].compareTo("scan")==0)
 	    {
@@ -308,20 +308,20 @@ public class CommandLine
 	       {
 		  System.out.println("Error: syntax is \"scan keyname scanlength [field1 field2 ...]\"");
 	       }
-	       else 
+	       else
 	       {
 		  Set<String> fields=null;
 
 		  if (tokens.length>3)
 		  {
 		     fields=new HashSet<String>();
-		     
+		
 		     for (int i=3; i<tokens.length; i++)
 		     {
 			fields.add(tokens[i]);
 		     }
 		  }
-		  
+		
 		  Vector<HashMap<String,ByteIterator>> results=new Vector<HashMap<String,ByteIterator>>();
 		  int ret=db.scan(table,tokens[1],Integer.parseInt(tokens[2]),fields,results);
 		  System.out.println("Return code: "+ret);
@@ -343,7 +343,7 @@ public class CommandLine
 		     }
 		     System.out.println("--------------------------------");
 		  }
-	       }		  
+	       }		
 	    }
 	    else if (tokens[0].compareTo("update")==0)
 	    {
@@ -351,7 +351,7 @@ public class CommandLine
 	       {
 		  System.out.println("Error: syntax is \"update keyname name1=value1 [name2=value2 ...]\"");
 	       }
-	       else 
+	       else
 	       {
 		  HashMap<String,ByteIterator> values=new HashMap<String,ByteIterator>();
 
@@ -363,7 +363,7 @@ public class CommandLine
 
 		  int ret=db.update(table,tokens[1],values);
 		  System.out.println("Return code: "+ret);
-	       }		  
+	       }		
 	    }
 	    else if (tokens[0].compareTo("insert")==0)
 	    {
@@ -371,7 +371,7 @@ public class CommandLine
 	       {
 		  System.out.println("Error: syntax is \"insert keyname name1=value1 [name2=value2 ...]\"");
 	       }
-	       else 
+	       else
 	       {
 		  HashMap<String,ByteIterator> values=new HashMap<String,ByteIterator>();
 
@@ -383,7 +383,7 @@ public class CommandLine
 
 		  int ret=db.insert(table,tokens[1],values);
 		  System.out.println("Return code: "+ret);
-	       }		  
+	       }		
 	    }
 	    else if (tokens[0].compareTo("delete")==0)
 	    {
@@ -391,20 +391,20 @@ public class CommandLine
 	       {
 		  System.out.println("Error: syntax is \"delete keyname\"");
 	       }
-	       else 
+	       else
 	       {
 		  int ret=db.delete(table,tokens[1]);
 		  System.out.println("Return code: "+ret);
-	       }		  
+	       }		
 	    }
 	    else
 	    {
 	       System.out.println("Error: unknown command \""+tokens[0]+"\"");
 	    }
-	    
+	
 	    System.out.println((System.currentTimeMillis()-st)+" ms");
-	    
+	
 	 }
       }
-      
+
 }

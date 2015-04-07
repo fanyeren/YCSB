@@ -64,7 +64,7 @@ public class CassandraClient10 extends DB
 
   public static final String COLUMN_FAMILY_PROPERTY = "cassandra.columnfamily";
   public static final String COLUMN_FAMILY_PROPERTY_DEFAULT = "data";
- 
+
   public static final String READ_CONSISTENCY_LEVEL_PROPERTY = "cassandra.readconsistencylevel";
   public static final String READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT = "ONE";
 
@@ -91,7 +91,7 @@ public class CassandraClient10 extends DB
   Map<ByteBuffer, Map<String, List<Mutation>>> record = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
 
   ColumnParent parent;
- 
+
   ConsistencyLevel readConsistencyLevel = ConsistencyLevel.ONE;
   ConsistencyLevel writeConsistencyLevel = ConsistencyLevel.ONE;
   ConsistencyLevel scanConsistencyLevel = ConsistencyLevel.ONE;
@@ -479,7 +479,7 @@ public class CassandraClient10 extends DB
         mutations.clear();
         mutationMap.clear();
         record.clear();
-        
+
         if (_debug)
         {
            System.out.println("ConsistencyLevel=" + writeConsistencyLevel.toString());

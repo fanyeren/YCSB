@@ -69,14 +69,14 @@ public class CassandraClient7 extends DB
   Cassandra.Client client;
 
   boolean _debug = false;
-  
+
   String _table = "";
   Exception errorexception = null;
-  
+
   List<Mutation> mutations = new ArrayList<Mutation>();
   Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
   Map<ByteBuffer, Map<String, List<Mutation>>> record = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
-  
+
   ColumnParent parent;
 
   /**
@@ -139,13 +139,13 @@ public class CassandraClient7 extends DB
       throw new DBException(connectexception);
     }
 
-    if (username != null && password != null) 
+    if (username != null && password != null)
     {
         Map<String,String> cred = new HashMap<String,String>();
         cred.put("username", username);
         cred.put("password", password);
         AuthenticationRequest req = new AuthenticationRequest(cred);
-        try 
+        try
         {
             client.login(req);
         }
@@ -168,7 +168,7 @@ public class CassandraClient7 extends DB
   /**
    * Read a record from the database. Each field/value pair from the result will
    * be stored in a HashMap.
-   * 
+   *
    * @param table
    *          The name of the table
    * @param key
@@ -182,12 +182,12 @@ public class CassandraClient7 extends DB
   public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result)
   {
     if (!_table.equals(table)) {
-      try 
+      try
       {
         client.set_keyspace(table);
         _table = table;
       }
-      catch (Exception e) 
+      catch (Exception e)
       {
         e.printStackTrace();
         e.printStackTrace(System.out);
@@ -204,7 +204,7 @@ public class CassandraClient7 extends DB
         if (fields == null)
         {
           predicate = new SlicePredicate().setSlice_range(new SliceRange(emptyByteBuffer, emptyByteBuffer, false, 1000000));
-          
+
         } else {
           ArrayList<ByteBuffer> fieldlist = new ArrayList<ByteBuffer>(fields.size());
           for (String s : fields)
@@ -267,7 +267,7 @@ public class CassandraClient7 extends DB
   /**
    * Perform a range scan for a set of records in the database. Each field/value
    * pair from the result will be stored in a HashMap.
-   * 
+   *
    * @param table
    *          The name of the table
    * @param startkey
@@ -285,19 +285,19 @@ public class CassandraClient7 extends DB
       Vector<HashMap<String, ByteIterator>> result)
   {
     if (!_table.equals(table)) {
-      try 
+      try
       {
         client.set_keyspace(table);
         _table = table;
       }
-      catch (Exception e) 
+      catch (Exception e)
       {
         e.printStackTrace();
         e.printStackTrace(System.out);
         return Error;
       }
     }
-    
+
     for (int i = 0; i < OperationRetries; i++)
     {
 
@@ -307,17 +307,17 @@ public class CassandraClient7 extends DB
         if (fields == null)
         {
           predicate = new SlicePredicate().setSlice_range(new SliceRange(emptyByteBuffer, emptyByteBuffer, false, 1000000));
-          
+
         } else {
           ArrayList<ByteBuffer> fieldlist = new ArrayList<ByteBuffer>(fields.size());
           for (String s : fields)
           {
       	    fieldlist.add(ByteBuffer.wrap(s.getBytes("UTF-8")));
           }
-          
+
           predicate = new SlicePredicate().setColumn_names(fieldlist);
         }
-        
+
         KeyRange kr = new KeyRange().setStart_key(startkey.getBytes("UTF-8")).setEnd_key(new byte[] {}).setCount(recordcount);
 
         List<KeySlice> results = client.get_range_slices(parent, predicate, kr, ConsistencyLevel.ONE);
@@ -331,7 +331,7 @@ public class CassandraClient7 extends DB
         for (KeySlice oneresult : results)
         {
           tuple = new HashMap<String, ByteIterator>();
-          
+
           Column column;
           String name;
           ByteIterator value;
@@ -340,7 +340,7 @@ public class CassandraClient7 extends DB
 	          column = onecol.column;
       	    name = new String(column.name.array(), column.name.position()+column.name.arrayOffset(), column.name.remaining());
       	    value = new ByteArrayByteIterator(column.value.array(), column.value.position()+column.value.arrayOffset(), column.value.remaining());
-            
+
       	    tuple.put(name, value);
 
             if (_debug)
@@ -377,7 +377,7 @@ public class CassandraClient7 extends DB
    * Update a record in the database. Any field/value pairs in the specified
    * values HashMap will be written into the record with the specified record
    * key, overwriting any existing values with the same field name.
-   * 
+   *
    * @param table
    *          The name of the table
    * @param key
@@ -395,7 +395,7 @@ public class CassandraClient7 extends DB
    * Insert a record in the database. Any field/value pairs in the specified
    * values HashMap will be written into the record with the specified record
    * key.
-   * 
+   *
    * @param table
    *          The name of the table
    * @param key
@@ -407,46 +407,46 @@ public class CassandraClient7 extends DB
   public int insert(String table, String key, HashMap<String, ByteIterator> values)
   {
     if (!_table.equals(table)) {
-      try 
+      try
       {
         client.set_keyspace(table);
         _table = table;
       }
-      catch (Exception e) 
+      catch (Exception e)
       {
         e.printStackTrace();
         e.printStackTrace(System.out);
         return Error;
       }
     }
-    
+
     for (int i = 0; i < OperationRetries; i++)
     {
       if (_debug)
       {
         System.out.println("Inserting key: " + key);
       }
-      
+
       try
-      { 
+      {
         ByteBuffer wrappedKey = ByteBuffer.wrap(key.getBytes("UTF-8"));
 
         ColumnOrSuperColumn column;
         for (Map.Entry<String, ByteIterator> entry : values.entrySet())
         {
           column = new ColumnOrSuperColumn();
-          column.setColumn( new Column( ByteBuffer.wrap(entry.getKey().getBytes("UTF-8")), 
+          column.setColumn( new Column( ByteBuffer.wrap(entry.getKey().getBytes("UTF-8")),
                                         ByteBuffer.wrap(entry.getValue().toArray()),
                                         System.currentTimeMillis()) );
-                                        
+
           mutations.add(new Mutation().setColumn_or_supercolumn(column));
         }
-        
+
         mutationMap.put(column_family, mutations);
         record.put(wrappedKey, mutationMap);
 
         client.batch_mutate(record, ConsistencyLevel.ONE);
-        
+
         mutations.clear();
         mutationMap.clear();
         record.clear();
@@ -471,7 +471,7 @@ public class CassandraClient7 extends DB
 
   /**
    * Delete a record from the database.
-   * 
+   *
    * @param table
    *          The name of the table
    * @param key
@@ -481,12 +481,12 @@ public class CassandraClient7 extends DB
   public int delete(String table, String key)
   {
     if (!_table.equals(table)) {
-      try 
+      try
       {
         client.set_keyspace(table);
         _table = table;
       }
-      catch (Exception e) 
+      catch (Exception e)
       {
         e.printStackTrace();
         e.printStackTrace(System.out);
@@ -498,8 +498,8 @@ public class CassandraClient7 extends DB
     {
       try
       {
-        client.remove(ByteBuffer.wrap(key.getBytes("UTF-8")), 
-                      new ColumnPath(column_family), 
+        client.remove(ByteBuffer.wrap(key.getBytes("UTF-8")),
+                      new ColumnPath(column_family),
                       System.currentTimeMillis(),
                       ConsistencyLevel.ONE);
 
@@ -570,46 +570,46 @@ public class CassandraClient7 extends DB
    * public static void main(String[] args) throws TException,
    * InvalidRequestException, UnavailableException,
    * UnsupportedEncodingException, NotFoundException {
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * String key_user_id = "1";
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
    * client.insert("Keyspace1", key_user_id, new ColumnPath("Standard1", null,
    * "age".getBytes("UTF-8")), "24".getBytes("UTF-8"), timestamp,
    * ConsistencyLevel.ONE);
-   * 
-   * 
+   *
+   *
    * // read single column ColumnPath path = new ColumnPath("Standard1", null,
    * "name".getBytes("UTF-8"));
-   * 
+   *
    * System.out.println(client.get("Keyspace1", key_user_id, path,
    * ConsistencyLevel.ONE));
-   * 
-   * 
+   *
+   *
    * // read entire row SlicePredicate predicate = new SlicePredicate(null, new
    * SliceRange(new byte[0], new byte[0], false, 10));
-   * 
+   *
    * ColumnParent parent = new ColumnParent("Standard1", null);
-   * 
+   *
    * List<ColumnOrSuperColumn> results = client.get_slice("Keyspace1",
    * key_user_id, parent, predicate, ConsistencyLevel.ONE);
-   * 
+   *
    * for (ColumnOrSuperColumn result : results) {
-   * 
+   *
    * Column column = result.column;
-   * 
+   *
    * System.out.println(new String(column.name, "UTF-8") + " -> " + new
    * String(column.value, "UTF-8"));
-   * 
+   *
    * }
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
    * }
    */
 }

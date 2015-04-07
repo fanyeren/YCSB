@@ -11,15 +11,12 @@
   <name>Mapkeeper DB Binding</name>
   <packaging>jar</packaging>
 
-
   <repositories>
     <repository>
-      <id>apache-releases</id>
-      <name>Apache releases</name>
-      <url>https://repository.apache.org/content/repositories/releases/</url>
+      <id>mapkeeper-releases</id>
+      <url>https://raw.github.com/m1ch1/m1ch1-mvn-repo/master/releases</url>
     </repository>
-  </repositories>
-
+  </repositories>      
 
   <dependencies>
      <dependency>
